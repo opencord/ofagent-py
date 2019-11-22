@@ -1,0 +1,7 @@
+
+# testing related
+venv-ofagent
+.coverage
+.tox
+coverage.xml
+nose2-results.xml
