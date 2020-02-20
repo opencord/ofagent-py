@@ -17,6 +17,9 @@ Common utility functions
 
 from loxi.pp import PrettyPrinter
 
+# ReservedVlan Transparent Vlan (Masked Vlan, VLAN_ANY in ONOS Flows)
+
+RESERVED_TRANSPARENT_VLAN = 4096
 
 def pp(obj):
     pp = PrettyPrinter(maxwidth=80)

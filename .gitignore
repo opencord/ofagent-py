@@ -5,3 +5,4 @@ venv-ofagent
 .tox
 coverage.xml
 nose2-results.xml
+.idea/

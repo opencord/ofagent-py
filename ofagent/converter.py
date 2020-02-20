@@ -24,6 +24,7 @@ from google.protobuf.descriptor import FieldDescriptor
 import loxi.of13 as of13
 from protobuf_to_dict import protobuf_to_dict, TYPE_CALLABLE_MAP
 from voltha_protos import openflow_13_pb2 as pb2
+from utils import RESERVED_TRANSPARENT_VLAN
 
 
 type_callable_map = copy(TYPE_CALLABLE_MAP)
@@ -87,7 +88,6 @@ def make_loxi_field(oxm_field):
     assert oxm_field['oxm_class'] == pb2.OFPXMC_OPENFLOW_BASIC
     ofb_field = oxm_field['ofb_field']
     field_type = ofb_field.get('type', 0)
-
     if field_type == pb2.OFPXMT_OFB_ETH_TYPE:
         return (
             of13.oxm.eth_type(value=ofb_field['eth_type']))
@@ -101,8 +101,12 @@ def make_loxi_field(oxm_field):
             of13.oxm.ip_proto(value=ofb_field['ip_proto']))
 
     elif field_type == pb2.OFPXMT_OFB_VLAN_VID:
-        return (
-            of13.oxm.vlan_vid(value=ofb_field['vlan_vid']))
+        if ofb_field.get('vlan_vid') == RESERVED_TRANSPARENT_VLAN and ofb_field['vlan_vid_mask'] == RESERVED_TRANSPARENT_VLAN:
+           return (
+               of13.oxm.vlan_vid_masked(value=ofb_field['vlan_vid_mask'], value_mask=ofb_field['vlan_vid_mask']))
+        else:
+           return (
+               of13.oxm.vlan_vid(value=ofb_field['vlan_vid']))
 
     elif field_type == pb2.OFPXMT_OFB_VLAN_PCP:
         return (
@@ -478,6 +482,14 @@ def loxi_oxm_metadata_to_ofp_oxm(lo):
             type=pb2.OFPXMT_OFB_METADATA,
             table_metadata=lo.value))
 
+def loxi_oxm_vlan_vid_masked_to_ofp_oxm(lo):
+    return pb2.ofp_oxm_field(
+        oxm_class=pb2.OFPXMC_OPENFLOW_BASIC,
+        ofb_field=pb2.ofp_oxm_ofb_field(
+            type=pb2.OFPXMT_OFB_VLAN_VID,
+            vlan_vid=lo.value,
+            vlan_vid_mask=lo.value))
+
 
 def loxi_apply_actions_to_ofp_instruction(lo):
     return pb2.ofp_instruction(
@@ -582,6 +594,7 @@ to_grpc_converters = {
     of13.oxm.udp_src: loxi_oxm_udp_src_to_ofp_oxm,
     of13.oxm.udp_dst: loxi_oxm_udp_dst_to_ofp_oxm,
     of13.oxm.metadata: loxi_oxm_metadata_to_ofp_oxm,
+    of13.oxm.vlan_vid_masked: loxi_oxm_vlan_vid_masked_to_ofp_oxm,
 
     of13.instruction.apply_actions: loxi_apply_actions_to_ofp_instruction,
     of13.instruction.clear_actions: loxi_clear_actions_to_ofp_instruction,
