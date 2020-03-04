@@ -98,7 +98,7 @@ class OpenFlowConnection(protocol.Protocol):
         :return: None
         """
         assert self.connected
-        
+
         if msg.xid is None:
             msg.xid = self._gen_xid()
         buf = msg.pack()

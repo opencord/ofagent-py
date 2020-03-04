@@ -101,7 +101,7 @@ def make_loxi_field(oxm_field):
             of13.oxm.ip_proto(value=ofb_field['ip_proto']))
 
     elif field_type == pb2.OFPXMT_OFB_VLAN_VID:
-        if ofb_field.get('vlan_vid') == RESERVED_TRANSPARENT_VLAN and ofb_field['vlan_vid_mask'] == RESERVED_TRANSPARENT_VLAN:
+        if ofb_field.get('vlan_vid') == RESERVED_TRANSPARENT_VLAN and 'vlan_vid_mask' in ofb_field and ofb_field['vlan_vid_mask'] == RESERVED_TRANSPARENT_VLAN:
            return (
                of13.oxm.vlan_vid_masked(value=ofb_field['vlan_vid_mask'], value_mask=ofb_field['vlan_vid_mask']))
         else:
